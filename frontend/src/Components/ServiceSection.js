@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { services } from './services';
 import Cart from './Cart';
@@ -10,7 +9,6 @@ const ServiceSection = () => {
   const [filteredServices, setFilteredServices] = useState([]);
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (Array.isArray(services)) {
