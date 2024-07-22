@@ -216,13 +216,6 @@ const AboutPage = () => {
             <p className="text-[#6D6D6D] text-lg">
               © 2024 JR-AUTO-DETAILING. All rights reserved.
             </p>
-            <div className="flex justify-center space-x-6">
-              {['Privacy Policy', 'Terms of Service', 'Contact Us'].map((item, index) => (
-                <a key={index} href="#" className="text-[#4A4A4A] hover:text-[#3A3A3A] transition duration-300">
-                  {item}
-                </a>
-              ))}
-            </div>
           </motion.div>
         </footer>
       </motion.div>
