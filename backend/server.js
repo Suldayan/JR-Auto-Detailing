@@ -75,7 +75,7 @@ app.get('/api/available-slots', async (req, res) => {
   const { date } = req.query;
   const bookings = await Booking.find({ date }); 
   const bookedTimes = bookings.map(booking => booking.time);
-  const allTimes = ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
+  const allTimes = ['10:00', '12:00', '14:00', '16:00', '18:00'];
   const availableSlots = allTimes.filter(time => !bookedTimes.includes(time));
   res.json({ availableSlots });
 });
