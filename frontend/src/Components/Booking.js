@@ -6,7 +6,7 @@ import { MailIcon, ClockIcon, ChevronDownIcon } from '@heroicons/react/outline';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'https://jr-auto-detailing.onrender.com';
 
 const Booking = () => {
   const location = useLocation();
