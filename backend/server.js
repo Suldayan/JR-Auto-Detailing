@@ -11,7 +11,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://master--jrautodetailing.netlify.app', 
+  origin: process.env.FRONTEND_URL || 'https://66a044d7a909f16acbb8a578--jrautodetailing.netlify.app/', 
   optionsSuccessStatus: 200
 }));
 app.use(express.json());
@@ -75,7 +75,7 @@ app.get('/api/available-slots', async (req, res) => {
   const { date } = req.query;
   const bookings = await Booking.find({ date }); 
   const bookedTimes = bookings.map(booking => booking.time);
-  const allTimes = ['10:00', '12:00', '14:00', '16:00', '18:00'];
+  const allTimes = ['10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
   const availableSlots = allTimes.filter(time => !bookedTimes.includes(time));
   res.json({ availableSlots });
 });
