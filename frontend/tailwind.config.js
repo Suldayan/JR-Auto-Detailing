@@ -1,15 +1,11 @@
 module.exports = {
-  purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
-  media: false,
+  content: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   theme: {
     extend: {
       fontFamily: {
         'mecha': ['Mecha', 'sans-serif'],
       },
     },
-  },
-  variants: {
-    extend: {},
   },
   plugins: [],
 }
