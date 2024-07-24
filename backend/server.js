@@ -1,58 +1,38 @@
-require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const { body, validationResult } = require('express-validator');
 const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
+const moment = require('moment');
+
+dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://66a044d7a909f16acbb8a578--jrautodetailing.netlify.app/', 
-  optionsSuccessStatus: 200
+  origin: process.env.FRONTEND_URL,
+  credentials: true,
 }));
 app.use(express.json());
-app.use(helmet());
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 100 
-});
-app.use(limiter);
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error('MongoDB connection error:', err));
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected successfully'))
-  .catch(err => {
-    console.error('MongoDB connection error:', err.message);
-    console.log('Attempted connection string:', process.env.MONGODB_URI.replace(/:([^@]+)@/, ':****@'));
-    process.exit(1);
-});
-
-mongoose.connection.on('error', err => {
-  console.error('MongoDB connection error:', err.message);
-});
-
-mongoose.connection.on('disconnected', () => {
-  console.log('MongoDB disconnected');
-});
-
-// Models
 const bookingSchema = new mongoose.Schema({
-  email: { type: String, required: true },
+  email: String,
   date: String,
   time: String,
-  services: { type: [String], required: true },
+  services: [String],
   totalPrice: Number,
 });
 
 const Booking = mongoose.model('Booking', bookingSchema);
 
-// Email transporter
 const transporter = nodemailer.createTransport({
   service: process.env.EMAIL_SERVICE,
   auth: {
@@ -61,86 +41,112 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const ownerEmail = process.env.OWNER_EMAIL; 
+// Define business hours and slot duration
+const BUSINESS_HOURS = {
+  start: 12, // 12 PM
+  end: 20,   // 8 PM
+};
+const SLOT_DURATION = 120; // 2 hours in minutes
 
-const formatTime = (time24) => {
-  const [hour, minute] = time24.split(':');
-  const hour12 = hour % 12 || 12;
-  const ampm = hour < 12 || hour === 24 ? 'AM' : 'PM';
-  return `${hour12}:${minute} ${ampm}`;
+// Helper function to generate time slots from 12 PM to 8 PM with 2-hour intervals
+const generateTimeSlots = () => {
+  const slots = [];
+  const startTime = moment().set({ hour: BUSINESS_HOURS.start, minute: 0, second: 0 });
+  const endTime = moment().set({ hour: BUSINESS_HOURS.end, minute: 0, second: 0 });
+
+  while (startTime < endTime) {
+    slots.push(startTime.format('HH:mm'));
+    startTime.add(SLOT_DURATION, 'minutes');
+  }
+
+  return slots;
 };
 
-// Routes
-app.get('/api/available-slots', async (req, res) => {
+app.get('/available-slots', async (req, res) => {
   const { date } = req.query;
-  const bookings = await Booking.find({ date }); 
-  const bookedTimes = bookings.map(booking => booking.time);
-  const allTimes = ['10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
-  const availableSlots = allTimes.filter(time => !bookedTimes.includes(time));
-  res.json({ availableSlots });
-});
-
-app.post('/api/book', [
-  body('email').isEmail(),
-  body('date').notEmpty(),
-  body('time').notEmpty(),
-  body('services').isArray().notEmpty(),
-  body('totalPrice').isNumeric(),
-], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+  
+  if (!date) {
+    return res.status(400).json({ message: 'Date is required' });
   }
 
   try {
+    // Generate all possible time slots
+    const allSlots = generateTimeSlots();
+
+    // Fetch existing bookings for the given date
+    const queryDate = moment(date).format('YYYY-MM-DD');
+    
+    const existingBookings = await Booking.find({
+      date: queryDate
+    });
+
+    console.log('Existing bookings:', existingBookings);
+
+    // Create a set of booked times
+    const bookedTimes = new Set(existingBookings.map(booking => booking.time));
+
+    console.log('Booked times:', Array.from(bookedTimes));
+
+    // Filter out booked slots
+    const availableSlots = allSlots.filter(slot => !bookedTimes.has(slot));
+
+    console.log('Available slots:', availableSlots);
+
+    res.json({ availableSlots });
+  } catch (error) {
+    console.error('Error fetching available slots:', error);
+    res.status(500).json({ message: 'Error fetching available slots' });
+  }
+});
+
+app.post('/book', async (req, res) => {
+  try {
     const { email, date, time, services, totalPrice } = req.body;
 
-    const existingBooking = await Booking.findOne({ date, time });
+    const queryDate = moment(date).format('YYYY-MM-DD');
+
+    // Check if the slot is still available
+    const existingBooking = await Booking.findOne({
+      date: queryDate,
+      time: time
+    });
+
     if (existingBooking) {
       return res.status(400).json({ message: 'This slot is no longer available' });
     }
 
-    const newBooking = new Booking({ email, date, time, services, totalPrice });
-    await newBooking.save();
+    // Create new booking
+    const newBooking = new Booking({
+      email,
+      date: queryDate,
+      time,
+      services,
+      totalPrice,
+    });
 
-    const formattedTime = formatTime(time);
+    // Save booking to database
+    const savedBooking = await newBooking.save();
+    console.log('Saved booking:', savedBooking);
 
-    const mailOptions = {
+    // Send confirmation email
+    await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
       subject: 'Booking Confirmation',
-      text: `Your booking for ${services.join(', ')} on ${date} at ${formattedTime} has been confirmed. Total price: $${totalPrice}`
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending email:', error);
-      } else {
-        console.log('Email sent:', info.response);
-      }
+      text: `Your booking for ${queryDate} at ${time} has been confirmed. Total price: $${totalPrice}`,
+      html: `<h1>Booking Confirmation</h1>
+             <p>Your booking for ${queryDate} at ${time} has been confirmed.</p>
+             <p>Services: ${services.join(', ')}</p>
+             <p>Total price: $${totalPrice}</p>`,
     });
 
-    const ownerMailOptions = {
-      from: process.env.EMAIL_USER,
-      to: 'timothysuldayan1@gmail.com',
-      subject: 'New Booking Received',
-      text: `A new booking has been made.\n\nDetails:\nEmail: ${email}\nDate: ${date}\nTime: ${formattedTime}\nServices: ${services.join(', ')}\nTotal Price: $${totalPrice}`
-    };
-
-    transporter.sendMail(ownerMailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending owner email:', error);
-      } else {
-        console.log('Owner email sent:', info.response);
-      }
-    });
-
-    res.status(201).json({ message: 'Booking successful' });
+    res.status(201).json({ message: 'Booking created successfully', booking: savedBooking });
   } catch (error) {
-    console.error('Booking error:', error);
-    res.status(500).json({ message: 'Error creating booking', error: error.message });
+    console.error('Error creating booking:', error);
+    res.status(500).json({ message: 'Error creating booking' });
   }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+});
