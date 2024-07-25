@@ -6,6 +6,9 @@ const dotenv = require('dotenv');
 const moment = require('moment');
 const NodeCache = require('node-cache');
 const morgan = require('morgan');
+const compression = require('compression');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 dotenv.config();
 
@@ -13,12 +16,23 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const cache = new NodeCache({ stdTTL: 3600 }); // Cache for 1 hour
 
+// Security headers
+app.use(helmet());
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
+
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true,
 }));
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(compression()); // Compress all routes
 
 // Custom logging middleware
 app.use((req, res, next) => {
@@ -33,6 +47,7 @@ app.use((req, res, next) => {
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  maxPoolSize: 10, // Maintain up to 10 socket connections
 })
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));

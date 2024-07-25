@@ -27,10 +27,48 @@ const PortfolioSection = () => {
         { src: './BENZ-REAR.jpg', alt: 'Exterior detailing' },
       ],
       description: 'Luxurious detailing for a premium SUV experience. Our team meticulously cleaned and polished every surface, bringing out the true beauty of this Mercedes-Benz GLE Coupe.',
+    },
+    {
+      car: 'Mercedes-Benz GLE Coupe',
+      image: 'https://purepng.com/public/uploads/large/purepng.com-mercedes-benz-gle-coupe-white-carcarvehicletransportmercedes-benz-961524660217nch4l.png',
+      stats: [
+        { label: 'Interior', value: 'Gold', icon: FaStar },
+        { label: 'Exterior', value: 'Gold', icon: FaStar },
+        { label: 'Duration', value: '1 hrs', icon: FaClock },
+        { label: 'Satisfaction', value: '100%', icon: FaSmile },
+      ],
+      workImages: [
+        { src: './BENZ-INTERIOR.jpg', alt: 'Interior detailing' },
+        { src: './BENZ-EXTERIOR.jpg', alt: 'Exterior polishing' },
+        { src: './BENZ-WHEELS.jpg', alt: 'Wheel cleaning' },
+        { src: './BENZ-STEAR.jpg', alt: 'Interior detailing' },
+        { src: './BENZ-TRUNK.jpg', alt: 'Interior detailing' },
+        { src: './BENZ-REAR.jpg', alt: 'Exterior detailing' },
+      ],
+      description: 'Luxurious detailing for a premium SUV experience. Our team meticulously cleaned and polished every surface, bringing out the true beauty of this Mercedes-Benz GLE Coupe.',
       testimonial: {
         text: "I appreciate the fine detailing that they have put towards my car. They follow their service packages thoroughly, producing exactly what I booked.",
         author: "Jackson Z."
       }
+    },
+    {
+      car: 'Mercedes-Benz GLE Coupe',
+      image: 'https://purepng.com/public/uploads/large/purepng.com-mercedes-benz-gle-coupe-white-carcarvehicletransportmercedes-benz-961524660217nch4l.png',
+      stats: [
+        { label: 'Interior', value: 'Gold', icon: FaStar },
+        { label: 'Exterior', value: 'Gold', icon: FaStar },
+        { label: 'Duration', value: '1 hrs', icon: FaClock },
+        { label: 'Satisfaction', value: '100%', icon: FaSmile },
+      ],
+      workImages: [
+        { src: './BENZ-INTERIOR.jpg', alt: 'Interior detailing' },
+        { src: './BENZ-EXTERIOR.jpg', alt: 'Exterior polishing' },
+        { src: './BENZ-WHEELS.jpg', alt: 'Wheel cleaning' },
+        { src: './BENZ-STEAR.jpg', alt: 'Interior detailing' },
+        { src: './BENZ-TRUNK.jpg', alt: 'Interior detailing' },
+        { src: './BENZ-REAR.jpg', alt: 'Exterior detailing' },
+      ],
+      description: 'Luxurious detailing for a premium SUV experience. Our team meticulously cleaned and polished every surface, bringing out the true beauty of this Mercedes-Benz GLE Coupe.',
     },
   ];
 
