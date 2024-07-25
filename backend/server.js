@@ -150,7 +150,7 @@ app.post('/book', async (req, res) => {
 
     // Send email after sending the response
     transporter.sendMail({
-      from: 'campogo2014@gmail.com',
+      from: process.env.EMAIL_USER,
       to: email,
       subject: 'Booking Confirmation',
       text: `Your booking for ${queryDate} at ${time} has been confirmed. Total price: $${totalPrice}`,
