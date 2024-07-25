@@ -16,7 +16,7 @@ const Booking = () => {
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState('');
   const [availableSlots, setAvailableSlots] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
 
@@ -37,39 +37,8 @@ const Booking = () => {
   }, [date]);
 
   useEffect(() => {
-    let retryCount = 0;
-    const maxRetries = 3;
-
-    const fetchWithRetry = async () => {
-      try {
-        await fetchAvailableSlots();
-      } catch (error) {
-        if (retryCount < maxRetries) {
-          retryCount++;
-          setTimeout(fetchWithRetry, 1000 * retryCount);
-        }
-      }
-    };
-
-    fetchWithRetry();
+    fetchAvailableSlots();
   }, [date, fetchAvailableSlots]);
-
-  useEffect(() => {
-    const prefetchNextDay = async () => {
-      const nextDay = new Date(date);
-      nextDay.setDate(nextDay.getDate() + 1);
-      const formattedNextDay = nextDay.toISOString().split('T')[0];
-      try {
-        await axios.get(`${API_URL}/available-slots?date=${formattedNextDay}`);
-      } catch (error) {
-        console.error('Error prefetching next day slots:', error);
-      }
-    };
-
-    if (date) {
-      prefetchNextDay();
-    }
-  }, [date]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -98,6 +67,14 @@ const Booking = () => {
     const ampm = hour < 12 || hour === 24 ? 'AM' : 'PM';
     return `${hour12}:${minute} ${ampm}`;
   };
+
+  const LoadingSkeleton = () => (
+    <div className="animate-pulse space-y-4">
+      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+      <div className="h-4 bg-gray-200 rounded"></div>
+      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+    </div>
+  );
 
   return (
     <motion.div 
@@ -158,39 +135,40 @@ const Booking = () => {
                 placeholderText="Select a date"
               />
             </motion.div>
-            <AnimatePresence>
-              {date && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <ClockIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                    </div>
-                    <select
-                      id="time"
-                      value={time}
-                      onChange={(e) => setTime(e.target.value)}
-                      className="block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition duration-300"
-                      required
-                    >
-                      <option value="">Select a time</option>
-                      {availableSlots.map(slot => (
-                        <option key={slot} value={slot}>{formatTime(slot)}</option>
-                      ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                      <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                    </div>
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <ClockIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </div>
+                {isLoading ? (
+                  <div className="block w-full pl-10 pr-10 py-2 sm:text-sm border-gray-300 rounded-md bg-gray-100">
+                    Loading available times...
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            {isLoading && <p>Loading available slots...</p>}
+                ) : (
+                  <select
+                    id="time"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    className="block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition duration-300"
+                    required
+                  >
+                    <option value="">Select a time</option>
+                    {availableSlots.map(slot => (
+                      <option key={slot} value={slot}>{formatTime(slot)}</option>
+                    ))}
+                  </select>
+                )}
+                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <ChevronDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </div>
+              </div>
+            </motion.div>
             {error && <p className="text-red-500">{error}</p>}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
