@@ -44,7 +44,7 @@
   },
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "react-app-rewired build && cp sitemap.xml build/",
+    "build": "react-app-rewired build && cp sitemap.xml build/ && cp _redirects build/",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },

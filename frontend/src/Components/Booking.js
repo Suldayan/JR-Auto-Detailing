@@ -13,33 +13,68 @@ const Booking = () => {
   const { cart = [], totalPrice = 0 } = location.state || {};
 
   const [email, setEmail] = useState('');
-  const [date, setDate] = useState(null);
+  const [date, setDate] = useState(new Date());
   const [time, setTime] = useState('');
   const [availableSlots, setAvailableSlots] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
 
   const fetchAvailableSlots = useCallback(async () => {
     if (!date) return;
     setIsLoading(true);
+    setError(null);
     try {
       const formattedDate = date.toISOString().split('T')[0];
       const response = await axios.get(`${API_URL}/available-slots?date=${formattedDate}`);
       setAvailableSlots(response.data.availableSlots);
     } catch (error) {
       console.error('Error fetching available slots:', error);
+      setError('Failed to fetch available slots. Please try again.');
     } finally {
       setIsLoading(false);
     }
   }, [date]);
 
   useEffect(() => {
-    fetchAvailableSlots();
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    const fetchWithRetry = async () => {
+      try {
+        await fetchAvailableSlots();
+      } catch (error) {
+        if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(fetchWithRetry, 1000 * retryCount);
+        }
+      }
+    };
+
+    fetchWithRetry();
   }, [date, fetchAvailableSlots]);
+
+  useEffect(() => {
+    const prefetchNextDay = async () => {
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      const formattedNextDay = nextDay.toISOString().split('T')[0];
+      try {
+        await axios.get(`${API_URL}/available-slots?date=${formattedNextDay}`);
+      } catch (error) {
+        console.error('Error prefetching next day slots:', error);
+      }
+    };
+
+    if (date) {
+      prefetchNextDay();
+    }
+  }, [date]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
     try {
       await axios.post(`${API_URL}/book`, {
         email,
@@ -51,7 +86,7 @@ const Booking = () => {
       alert('Booking successful!');
     } catch (error) {
       console.error('Error creating booking:', error);
-      alert('Error creating booking. Please try again.');
+      setError('Error creating booking. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -155,6 +190,8 @@ const Booking = () => {
                 </motion.div>
               )}
             </AnimatePresence>
+            {isLoading && <p>Loading available slots...</p>}
+            {error && <p className="text-red-500">{error}</p>}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
