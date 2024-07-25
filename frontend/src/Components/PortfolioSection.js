@@ -2,6 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaStar, FaClock, FaSmile, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
+import masaratiFront from '../Components/Car-Images/MASERATI-FRONT';
+import masaratiDash from '../Components/Car-Images/MASERATI-DASH';
+import masaratiWheel from '../Components/Car-Images/MASERATI-WHEEL';
+import masaratiShotgun from '../Components/Car-Images/MASERATI-SHOTGUN';
+import masaratiSeats from '../Components/Car-Images/MASERATI-SEATS';
+
+import claBack from '../Components/Car-Images/MERCEDES-CLA-BACK';
+import claDash from '../Components/Car-Images/MERCEDES-CLA-DASH';
+import claExt from '../Components/Car-Images/MERCEDES-CLA-EXT';
+import claSeats from '../Components/Car-Images/MERCEDES-CLA-SEATS';
+import claWheel from '../Components/Car-Images/MERCEDES-CLA-WHEEL';
+
 const PortfolioSection = () => {
   const [selectedCar, setSelectedCar] = useState(0);
   const [activeImage, setActiveImage] = useState(null);
@@ -42,11 +54,11 @@ const PortfolioSection = () => {
         { label: 'Satisfaction', value: '100%', icon: FaSmile },
       ],
       workImages: [
-        { src: './Car-Images/MASERATI-FRONT.jpg', alt: 'Interior detailing' },
-        { src: './Car-Images/MASERATI-DASH.jpg', alt: 'Wheel cleaning' },
-        { src: './Car-Images/MASERATI-FRONT.jpg', alt: 'Interior detailing' },
-        { src: './Car-Images/MASERATI-SEATS.jpg', alt: 'Interior detailing' },
-        { src: './Car-Images/MASERATI-SHOTGUN.jpg', alt: 'Exterior detailing' },
+        { src: masaratiFront, alt: 'Interior detailing' },
+        { src: masaratiDash, alt: 'Wheel cleaning' },
+        { src: masaratiSeats, alt: 'Interior detailing' },
+        { src: masaratiShotgun, alt: 'Interior detailing' },
+        { src: masaratiWheel, alt: 'Exterior detailing' },
       ],
       description: 'Luxurious detailing for a premium SUV experience. Our team meticulously cleaned and polished every surface, bringing out the true beauty of this Mercedes-Benz GLE Coupe.',
     },
@@ -60,11 +72,11 @@ const PortfolioSection = () => {
         { label: 'Satisfaction', value: '100%', icon: FaSmile },
       ],
       workImages: [
-        { src: './Car-Images/MERCEDES-CLA-EXT.jpg', alt: 'Interior detailing' },
-        { src: './Car-Images/MERCEDES-CLA-BACK.jpg', alt: 'Exterior polishing' },
-        { src: './Car-Images/MERCEDES-CLA-WHEEL.jpg', alt: 'Wheel cleaning' },
-        { src: './Car-Images/MERCEDES-CLA-SEATS.jpg', alt: 'Interior detailing' },
-        { src: './Car-Images/MERCEDES-CLA-DASH.jpg', alt: 'Interior detailing' },
+        { src: claBack, alt: 'Interior detailing' },
+        { src: claExt, alt: 'Exterior polishing' },
+        { src: claDash, alt: 'Wheel cleaning' },
+        { src: claSeats, alt: 'Interior detailing' },
+        { src: claWheel, alt: 'Interior detailing' },
       ],
       description: 'Luxurious detailing for a premium SUV experience. Our team meticulously cleaned and polished every surface, bringing out the true beauty of this Mercedes-Benz GLE Coupe.',
     },
