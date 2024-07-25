@@ -68,14 +68,6 @@ const Booking = () => {
     return `${hour12}:${minute} ${ampm}`;
   };
 
-  const LoadingSkeleton = () => (
-    <div className="animate-pulse space-y-4">
-      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-      <div className="h-4 bg-gray-200 rounded"></div>
-      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-    </div>
-  );
-
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
