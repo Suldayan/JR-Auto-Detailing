@@ -4,7 +4,7 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
 const moment = require('moment');
-const NodeCache = require('node-cache');
+const Redis = require('ioredis');
 const morgan = require('morgan');
 const compression = require('compression');
 const helmet = require('helmet');
@@ -14,15 +14,15 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const cache = new NodeCache({ stdTTL: 3600 }); // Cache for 1 hour
+const redis = new Redis(process.env.REDIS_URL);
 
 // Security headers
 app.use(helmet());
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
 });
 app.use(limiter);
 
@@ -32,9 +32,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(morgan('dev'));
-app.use(compression()); // Compress all routes
+app.use(compression());
 
-// Custom logging middleware
+// Performance monitoring middleware
 app.use((req, res, next) => {
   req.startTime = Date.now();
   res.on('finish', () => {
@@ -47,7 +47,7 @@ app.use((req, res, next) => {
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  maxPoolSize: 10, // Maintain up to 10 socket connections
+  maxPoolSize: 10,
 })
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
@@ -61,6 +61,7 @@ const bookingSchema = new mongoose.Schema({
 });
 
 bookingSchema.index({ date: 1, time: 1 }, { unique: true });
+bookingSchema.index({ date: 1 });
 
 const Booking = mongoose.model('Booking', bookingSchema);
 
@@ -78,7 +79,7 @@ const BUSINESS_HOURS = {
 };
 const SLOT_DURATION = parseInt(process.env.SLOT_DURATION) || 120;
 
-const generateTimeSlots = () => {
+const generateTimeSlots = (() => {
   const slots = [];
   const startTime = moment().set({ hour: BUSINESS_HOURS.start, minute: 0, second: 0 });
   const endTime = moment().set({ hour: BUSINESS_HOURS.end, minute: 0, second: 0 });
@@ -88,8 +89,8 @@ const generateTimeSlots = () => {
     startTime.add(SLOT_DURATION, 'minutes');
   }
 
-  return slots;
-};
+  return () => slots;
+})();
 
 app.get('/', (req, res) => {
   res.send('Welcome to the booking service API');
@@ -103,13 +104,14 @@ app.get('/available-slots', async (req, res) => {
   }
 
   const cacheKey = `availableSlots_${date}`;
-  const cachedSlots = cache.get(cacheKey);
-
-  if (cachedSlots) {
-    return res.json({ availableSlots: cachedSlots });
-  }
 
   try {
+    const cachedSlots = await redis.get(cacheKey);
+
+    if (cachedSlots) {
+      return res.json({ availableSlots: JSON.parse(cachedSlots) });
+    }
+
     const allSlots = generateTimeSlots();
     const queryDate = moment(date).format('YYYY-MM-DD');
     
@@ -117,7 +119,7 @@ app.get('/available-slots', async (req, res) => {
     const bookedTimes = new Set(existingBookings.map(booking => booking.time));
     const availableSlots = allSlots.filter(slot => !bookedTimes.has(slot));
 
-    cache.set(cacheKey, availableSlots);
+    await redis.set(cacheKey, JSON.stringify(availableSlots), 'EX', 3600);
     res.json({ availableSlots });
   } catch (error) {
     console.error('Error fetching available slots:', error);
@@ -144,7 +146,7 @@ app.post('/book', async (req, res) => {
     res.status(201).json({ message: 'Booking created successfully', booking: newBooking });
 
     // Clear the cache for this date
-    cache.del(`availableSlots_${queryDate}`);
+    await redis.del(`availableSlots_${queryDate}`);
 
     // Send email after sending the response
     transporter.sendMail({
@@ -159,7 +161,7 @@ app.post('/book', async (req, res) => {
     }).catch(error => console.error('Error sending email:', error));
 
   } catch (error) {
-    if (error.code === 11000) { // Duplicate key error
+    if (error.code === 11000) {
       return res.status(400).json({ message: 'This slot is no longer available' });
     }
     console.error('Error creating booking:', error);
