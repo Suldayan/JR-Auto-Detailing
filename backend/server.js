@@ -20,6 +20,7 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'));
 
+// Custom logging middleware
 app.use((req, res, next) => {
   req.startTime = Date.now();
   res.on('finish', () => {
@@ -32,20 +33,19 @@ app.use((req, res, next) => {
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  poolSize: 10,
 })
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
 
 const bookingSchema = new mongoose.Schema({
-  email: String,
-  date: String,
-  time: String,
-  services: [String],
-  totalPrice: Number,
+  email: { type: String, required: true },
+  date: { type: String, required: true },
+  time: { type: String, required: true },
+  services: { type: [String], required: true },
+  totalPrice: { type: Number, required: true },
 });
 
-bookingSchema.index({ date: 1, time: 1 });
+bookingSchema.index({ date: 1, time: 1 }, { unique: true });
 
 const Booking = mongoose.model('Booking', bookingSchema);
 
@@ -76,6 +76,10 @@ const generateTimeSlots = () => {
   return slots;
 };
 
+app.get('/', (req, res) => {
+  res.send('Welcome to the booking service API');
+});
+
 app.get('/available-slots', async (req, res) => {
   const { date } = req.query;
   
@@ -94,19 +98,9 @@ app.get('/available-slots', async (req, res) => {
     const allSlots = generateTimeSlots();
     const queryDate = moment(date).format('YYYY-MM-DD');
     
-    const existingBookings = await Booking.find({
-      date: queryDate
-    }).lean();
-
-    console.log('Existing bookings:', existingBookings);
-
+    const existingBookings = await Booking.find({ date: queryDate }, 'time').lean();
     const bookedTimes = new Set(existingBookings.map(booking => booking.time));
-
-    console.log('Booked times:', Array.from(bookedTimes));
-
     const availableSlots = allSlots.filter(slot => !bookedTimes.has(slot));
-
-    console.log('Available slots:', availableSlots);
 
     cache.set(cacheKey, availableSlots);
     res.json({ availableSlots });
@@ -122,15 +116,6 @@ app.post('/book', async (req, res) => {
 
     const queryDate = moment(date).format('YYYY-MM-DD');
 
-    const existingBooking = await Booking.findOne({
-      date: queryDate,
-      time: time
-    }).lean();
-
-    if (existingBooking) {
-      return res.status(400).json({ message: 'This slot is no longer available' });
-    }
-
     const newBooking = new Booking({
       email,
       date: queryDate,
@@ -139,10 +124,9 @@ app.post('/book', async (req, res) => {
       totalPrice,
     });
 
-    const savedBooking = await newBooking.save();
-    console.log('Saved booking:', savedBooking);
+    await newBooking.save();
 
-    res.status(201).json({ message: 'Booking created successfully', booking: savedBooking });
+    res.status(201).json({ message: 'Booking created successfully', booking: newBooking });
 
     // Clear the cache for this date
     cache.del(`availableSlots_${queryDate}`);
@@ -160,6 +144,9 @@ app.post('/book', async (req, res) => {
     }).catch(error => console.error('Error sending email:', error));
 
   } catch (error) {
+    if (error.code === 11000) { // Duplicate key error
+      return res.status(400).json({ message: 'This slot is no longer available' });
+    }
     console.error('Error creating booking:', error);
     res.status(500).json({ message: 'Error creating booking' });
   }
