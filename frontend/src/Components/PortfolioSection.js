@@ -15,26 +15,7 @@ const PortfolioSection = () => {
       stats: [
         { label: 'Interior', value: 'Gold', icon: FaStar },
         { label: 'Exterior', value: 'Gold', icon: FaStar },
-        { label: 'Duration', value: '1 hrs', icon: FaClock },
-        { label: 'Satisfaction', value: '100%', icon: FaSmile },
-      ],
-      workImages: [
-        { src: './BENZ-INTERIOR.jpg', alt: 'Interior detailing' },
-        { src: './BENZ-EXTERIOR.jpg', alt: 'Exterior polishing' },
-        { src: './BENZ-WHEELS.jpg', alt: 'Wheel cleaning' },
-        { src: './BENZ-STEAR.jpg', alt: 'Interior detailing' },
-        { src: './BENZ-TRUNK.jpg', alt: 'Interior detailing' },
-        { src: './BENZ-REAR.jpg', alt: 'Exterior detailing' },
-      ],
-      description: 'Luxurious detailing for a premium SUV experience. Our team meticulously cleaned and polished every surface, bringing out the true beauty of this Mercedes-Benz GLE Coupe.',
-    },
-    {
-      car: 'Mercedes-Benz GLE Coupe',
-      image: 'https://purepng.com/public/uploads/large/purepng.com-mercedes-benz-gle-coupe-white-carcarvehicletransportmercedes-benz-961524660217nch4l.png',
-      stats: [
-        { label: 'Interior', value: 'Gold', icon: FaStar },
-        { label: 'Exterior', value: 'Gold', icon: FaStar },
-        { label: 'Duration', value: '1 hrs', icon: FaClock },
+        { label: 'Duration', value: '1 1/2 hrs', icon: FaClock },
         { label: 'Satisfaction', value: '100%', icon: FaSmile },
       ],
       workImages: [
@@ -52,12 +33,31 @@ const PortfolioSection = () => {
       }
     },
     {
+      car: 'Maserati Q4',
+      image: 'https://www.pngmart.com/files/22/Maserati-Quattroporte-PNG-HD-Isolated.png',
+      stats: [
+        { label: 'Interior', value: 'Gold', icon: FaStar },
+        { label: 'Exterior', value: 'Gold', icon: FaStar },
+        { label: 'Duration', value: '2 hrs', icon: FaClock },
+        { label: 'Satisfaction', value: '100%', icon: FaSmile },
+      ],
+      workImages: [
+        { src: './BENZ-INTERIOR.jpg', alt: 'Interior detailing' },
+        { src: './BENZ-EXTERIOR.jpg', alt: 'Exterior polishing' },
+        { src: './BENZ-WHEELS.jpg', alt: 'Wheel cleaning' },
+        { src: './BENZ-STEAR.jpg', alt: 'Interior detailing' },
+        { src: './BENZ-TRUNK.jpg', alt: 'Interior detailing' },
+        { src: './BENZ-REAR.jpg', alt: 'Exterior detailing' },
+      ],
+      description: 'Luxurious detailing for a premium SUV experience. Our team meticulously cleaned and polished every surface, bringing out the true beauty of this Mercedes-Benz GLE Coupe.',
+    },
+    {
       car: 'Mercedes-Benz GLE Coupe',
       image: 'https://purepng.com/public/uploads/large/purepng.com-mercedes-benz-gle-coupe-white-carcarvehicletransportmercedes-benz-961524660217nch4l.png',
       stats: [
         { label: 'Interior', value: 'Gold', icon: FaStar },
         { label: 'Exterior', value: 'Gold', icon: FaStar },
-        { label: 'Duration', value: '1 hrs', icon: FaClock },
+        { label: 'Duration', value: '2 hrs', icon: FaClock },
         { label: 'Satisfaction', value: '100%', icon: FaSmile },
       ],
       workImages: [
@@ -215,16 +215,18 @@ const PortfolioSection = () => {
                   >
                     {portfolioItems[selectedCar].description}
                   </motion.p>
-                  <motion.div
-                    className="bg-[#F5F5F3] p-6 rounded-lg shadow-md border border-[#E0E0E0]"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6, duration: 0.5 }}
-                  >
-                    <h4 className="text-xl font-semibold mb-2">Client Testimonial</h4>
-                    <p className="italic text-[#6D6D6D] bg-white p-4 rounded-lg shadow-sm">"{portfolioItems[selectedCar].testimonial.text}"</p>
-                    <p className="text-right mt-2 font-semibold">- {portfolioItems[selectedCar].testimonial.author}</p>
-                  </motion.div>
+                  {portfolioItems[selectedCar].testimonial && (
+                    <motion.div
+                      className="bg-[#F5F5F3] p-6 rounded-lg shadow-md border border-[#E0E0E0]"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6, duration: 0.5 }}
+                    >
+                      <h4 className="text-xl font-semibold mb-2">Client Testimonial</h4>
+                      <p className="italic text-[#6D6D6D] bg-white p-4 rounded-lg shadow-sm">"{portfolioItems[selectedCar].testimonial.text}"</p>
+                      <p className="text-right mt-2 font-semibold">- {portfolioItems[selectedCar].testimonial.author}</p>
+                    </motion.div>
+                  )}
                 </div>
                 <div className="space-y-6">
                   <motion.h4 
