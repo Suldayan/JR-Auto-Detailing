@@ -2,17 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaStar, FaClock, FaSmile, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
-import masaratiFront from '../Car-Images/MASERATI-FRONT';
-import masaratiDash from '../Car-Images/MASERATI-DASH';
-import masaratiWheel from '../Car-Images/MASERATI-WHEEL';
-import masaratiShotgun from '../Car-Images/MASERATI-SHOTGUN';
-import masaratiSeats from '../Car-Images/MASERATI-SEATS';
+import masaratiFront from './Car-Images/MASERATI-FRONT';
+import masaratiDash from './Car-Images/MASERATI-DASH';
+import masaratiWheel from './Car-Images/MASERATI-WHEEL';
+import masaratiShotgun from './Car-Images/MASERATI-SHOTGUN';
+import masaratiSeats from './Car-Images/MASERATI-SEATS';
 
-import claBack from '../Car-Images/MERCEDES-CLA-BACK';
-import claDash from '../Car-Images/MERCEDES-CLA-DASH';
-import claExt from '../Car-Images/MERCEDES-CLA-EXT';
-import claSeats from '../Car-Images/MERCEDES-CLA-SEATS';
-import claWheel from '../Car-Images/MERCEDES-CLA-WHEEL';
+import claBack from './Car-Images/MERCEDES-CLA-BACK';
+import claDash from './Car-Images/MERCEDES-CLA-DASH';
+import claExt from './Car-Images/MERCEDES-CLA-EXT';
+import claSeats from './Car-Images/MERCEDES-CLA-SEATS';
+import claWheel from './Car-Images/MERCEDES-CLA-WHEEL';
 
 const PortfolioSection = () => {
   const [selectedCar, setSelectedCar] = useState(0);
