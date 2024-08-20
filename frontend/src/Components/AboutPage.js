@@ -173,7 +173,7 @@ const AboutPage = () => {
             >
               <div className="text-center border-b sm:border-b-0 sm:border-r border-[#E0E0E0] pb-6 sm:pb-0">
                 <motion.iframe 
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2606.6936957946077!2d-122.85836492362144!3d49.206369971381356!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5485d78b823f106b%3A0xe22ad6cd36ff8644!2s13223%20112%20Ave%2C%20Surrey%2C%20BC%20V3R%202E6!5e0!3m2!1sen!2sca!4v1721010874500!5m2!1sen!2sca"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1303.209468707969!2d-122.86173396107111!3d49.21158154284561!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5485d7f391c8f6fb%3A0x7537dbe5c2a0bbd8!2sSurrey%2C%20BC%20V3R%200C3!5e0!3m2!1sen!2sca!4v1724177127387!5m2!1sen!2sca"
                   width="100%" 
                   height="250" 
                   style={{border:0}} 
@@ -185,7 +185,7 @@ const AboutPage = () => {
                   whileHover={{ scale: 1.05 }}
                 ></motion.iframe>
                 <p className="mt-4 font-semibold text-xl">Our Location</p>
-                <p className="text-lg text-[#6D6D6D]">13223 112 Ave, Surrey, BC V3R 2E6</p>
+                <p className="text-lg text-[#6D6D6D]">13085 115 AVE, Surrey, BC V3R 0C3</p>
               </div>
               {[
                 { icon: FaInstagram, label: 'Follow Us', link: 'https://www.instagram.com/jrautoodetailing/' },
