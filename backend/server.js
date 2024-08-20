@@ -190,6 +190,18 @@ app.post('/book', async (req, res) => {
              <p>Total price: $${totalPrice}</p>`,
     }).catch(error => console.error('Error sending email:', error));
 
+    // Send email to the owner
+    transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_OWNER,
+      subject: 'New Booking',
+      text: `New booking for ${queryDate} at ${time}`,
+      html: `<h1>New Booking</h1>
+             <p>New booking for ${queryDate} at ${time}</p>
+             <p>Services: ${services.join(', ')}</p>
+             <p>Total price: $${totalPrice}</p>`,
+    }).catch(error => console.error('Error sending email:', error));
+
   } catch (error) {
     if (error.code === 11000) {
       return res.status(400).json({ message: 'This slot is no longer available' });
@@ -207,3 +219,4 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });
+
