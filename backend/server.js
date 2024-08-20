@@ -74,48 +74,18 @@ const transporter = nodemailer.createTransport({
 });
 
 const BUSINESS_HOURS = {
-  Monday: {
-    start: 9,
-    end: 18,
-  },
-  Tuesday: {
-    start: 9,
-    end: 18,
-  },
-  Wednesday: {
-    start: 10,
-    end: 19,
-  },
-  Thursday: {
-    start: 9,
-    end: 18,
-  },
-  Friday: {
-    start: 9,
-    end: 20,
-  },
-  Saturday: {
-    start: 10,
-    end: 17,
-  },
-  Sunday: {
-    start: 0,
-    end: 0,
-  },
+  start: parseInt(process.env.BUSINESS_HOURS_START) || 12,
+  end: parseInt(process.env.BUSINESS_HOURS_END) || 20,
 };
 const SLOT_DURATION = parseInt(process.env.SLOT_DURATION) || 120;
 
 const generateTimeSlots = (() => {
   const slots = [];
-  const currentDay = moment().day();
-  const startTime = moment().set({ hour: BUSINESS_HOURS[moment.weekdays(true)[currentDay]].start, minute: 0, second: 0 });
-  const endTime = moment().set({ hour: BUSINESS_HOURS[moment.weekdays(true)[currentDay]].end, minute: 0, second: 0 });
+  const startTime = moment().set({ hour: BUSINESS_HOURS.start, minute: 0, second: 0 });
+  const endTime = moment().set({ hour: BUSINESS_HOURS.end, minute: 0, second: 0 });
 
   while (startTime < endTime) {
-    const currentDay = startTime.day();
-    if (currentDay !== 0) { // 0 is Sunday, 1 is Monday, and so on
-      slots.push(startTime.format('HH:mm'));
-    }
+    slots.push(startTime.format('HH:mm'));
     startTime.add(SLOT_DURATION, 'minutes');
   }
 
