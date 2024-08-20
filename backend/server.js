@@ -178,29 +178,35 @@ app.post('/book', async (req, res) => {
     // Clear the cache for this date
     await redis.del(`availableSlots_${queryDate}`);
 
-    // Send email after sending the response
-    transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Booking Confirmation',
-      text: `Your booking for ${queryDate} at ${time} has been confirmed. Total price: $${totalPrice}`,
-      html: `<h1>Booking Confirmation</h1>
-             <p>Your booking for ${queryDate} at ${time} has been confirmed.</p>
-             <p>Services: ${services.join(', ')}</p>
-             <p>Total price: $${totalPrice}</p>`,
-    }).catch(error => console.error('Error sending email:', error));
+  // Send email to the customer
+  transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Booking Confirmation',
+    text: `Your booking for ${queryDate} at ${time} has been confirmed. Total price: $${totalPrice}`,
+    html: `<h1>Booking Confirmation</h1>
+          <p>Your booking for ${queryDate} at ${time} has been confirmed.</p>
+          <p>Services: ${services.join(', ')}</p>
+          <p>Total price: $${totalPrice}</p>`,
+  }).catch(error => {
+    console.error('Error sending email to customer:', error);
+    throw error;
+  });
 
-    // Send email to the owner
-    transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_OWNER,
-      subject: 'New Booking',
-      text: `New booking for ${queryDate} at ${time}`,
-      html: `<h1>New Booking</h1>
-             <p>New booking for ${queryDate} at ${time}</p>
-             <p>Services: ${services.join(', ')}</p>
-             <p>Total price: $${totalPrice}</p>`,
-    }).catch(error => console.error('Error sending email:', error));
+  // Send email to the owner
+  transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: process.env.EMAIL_OWNER,
+    subject: 'New Booking',
+    text: `New booking for ${queryDate} at ${time}`,
+    html: `<h1>New Booking</h1>
+          <p>New booking for ${queryDate} at ${time}</p>
+          <p>Services: ${services.join(', ')}</p>
+          <p>Total price: $${totalPrice}</p>`,
+  }).catch(error => {
+    console.error('Error sending email to owner:', error);
+    throw error;
+  });
 
   } catch (error) {
     if (error.code === 11000) {
