@@ -74,8 +74,34 @@ const transporter = nodemailer.createTransport({
 });
 
 const BUSINESS_HOURS = {
-  start: parseInt(process.env.BUSINESS_HOURS_START) || 12,
-  end: parseInt(process.env.BUSINESS_HOURS_END) || 20,
+  Monday: {
+    start: 9,
+    end: 18,
+  },
+  Tuesday: {
+    start: 9,
+    end: 18,
+  },
+  Wednesday: {
+    start: 10,
+    end: 19,
+  },
+  Thursday: {
+    start: 9,
+    end: 18,
+  },
+  Friday: {
+    start: 9,
+    end: 20,
+  },
+  Saturday: {
+    start: 10,
+    end: 17,
+  },
+  Sunday: {
+    start: 0,
+    end: 0,
+  },
 };
 const SLOT_DURATION = parseInt(process.env.SLOT_DURATION) || 120;
 
@@ -85,7 +111,10 @@ const generateTimeSlots = (() => {
   const endTime = moment().set({ hour: BUSINESS_HOURS.end, minute: 0, second: 0 });
 
   while (startTime < endTime) {
-    slots.push(startTime.format('HH:mm'));
+    const currentDay = startTime.day();
+    if (currentDay !== 0) { 
+      slots.push(startTime.format('HH:mm'));
+    }
     startTime.add(SLOT_DURATION, 'minutes');
   }
 
@@ -147,7 +176,7 @@ app.post('/book', async (req, res) => {
 
     // Clear the cache for this date
     await redis.del(`availableSlots_${queryDate}`);
-
+ 
     // Send email after sending the response
     transporter.sendMail({
       from: process.env.EMAIL_USER,
