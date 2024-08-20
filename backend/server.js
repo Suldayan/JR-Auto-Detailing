@@ -107,12 +107,13 @@ const SLOT_DURATION = parseInt(process.env.SLOT_DURATION) || 120;
 
 const generateTimeSlots = (() => {
   const slots = [];
-  const startTime = moment().set({ hour: BUSINESS_HOURS.start, minute: 0, second: 0 });
-  const endTime = moment().set({ hour: BUSINESS_HOURS.end, minute: 0, second: 0 });
+  const currentDay = moment().day();
+  const startTime = moment().set({ hour: BUSINESS_HOURS[moment.weekdays(true)[currentDay]].start, minute: 0, second: 0 });
+  const endTime = moment().set({ hour: BUSINESS_HOURS[moment.weekdays(true)[currentDay]].end, minute: 0, second: 0 });
 
   while (startTime < endTime) {
     const currentDay = startTime.day();
-    if (currentDay !== 0) { 
+    if (currentDay !== 0) { // 0 is Sunday, 1 is Monday, and so on
       slots.push(startTime.format('HH:mm'));
     }
     startTime.add(SLOT_DURATION, 'minutes');
@@ -176,7 +177,7 @@ app.post('/book', async (req, res) => {
 
     // Clear the cache for this date
     await redis.del(`availableSlots_${queryDate}`);
- 
+
     // Send email after sending the response
     transporter.sendMail({
       from: process.env.EMAIL_USER,
