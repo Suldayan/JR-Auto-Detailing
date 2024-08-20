@@ -195,8 +195,8 @@ app.post('/book', async (req, res) => {
 
   // Send email to the owner
   transporter.sendMail({
-    from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_OWNER,
+    from: email,
+    to: "jrautomobilespa@gmail.com",
     subject: 'New Booking',
     text: `New booking for ${queryDate} at ${time}`,
     html: `<h1>New Booking</h1>
